@@ -70,14 +70,25 @@ target_include_directories(laserscan_virtualizer PUBLIC ${EIGEN_INCLUDE_DIRS})
 target_include_directories(laserscan_virtualizer PUBLIC ${PCL_INCLUDE_DIRS})
 target_link_libraries(laserscan_virtualizer ${PCL_LIBRARIES})
 
-add_library(${PROJECT_NAME} SHARED src/laserscan_multi_merger.cpp)
+add_library(${PROJECT_NAME} SHARED src/laserscan_multi_merger.cpp src/pointcloud_merger.cpp)
 ament_target_dependencies(${PROJECT_NAME} ${dependencies})
 target_include_directories(${PROJECT_NAME} PUBLIC ${EIGEN_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${PCL_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${PCL_LIBRARIES})
 rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::LaserscanMerger")
 
-install(TARGETS ${PROJECT_NAME} laserscan_multi_merger laserscan_virtualizer
+
+# Register the component
+rclcpp_components_register_node(${PROJECT_NAME}
+  PLUGIN "ira_laser_tools::PointCloudMerger"
+  EXECUTABLE pointcloud_merger
+)
+ament_target_dependencies(pointcloud_merger ${dependencies})
+target_include_directories(pointcloud_merger PUBLIC ${EIGEN_INCLUDE_DIRS})
+target_include_directories(pointcloud_merger PUBLIC ${PCL_INCLUDE_DIRS})
+target_link_libraries(pointcloud_merger ${PCL_LIBRARIES})
+
+install(TARGETS ${PROJECT_NAME} laserscan_multi_merger laserscan_virtualizer pointcloud_merger
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
@@ -97,7 +108,6 @@ EXPORT ${PROJECT_NAME}Targets
         RUNTIME DESTINATION bin
         INCLUDES DESTINATION include
 )
-
 install(EXPORT ${PROJECT_NAME}Targets
       DESTINATION share/${PROJECT_NAME}/cmake)
 
