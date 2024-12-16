@@ -117,6 +117,7 @@ private:
         if (!merged_cloud.data.empty()) {
             sensor_msgs::msg::PointCloud2 output_cloud;
             pcl_conversions::fromPCL(merged_cloud, output_cloud);
+            output_cloud.row_step = output_cloud.width * output_cloud.point_step;
             pointcloud_publisher_->publish(output_cloud);
         }
     }
